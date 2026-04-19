@@ -18,7 +18,7 @@ from jarvis.agent.models import AgentExecutionResult
 LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass()
 class QueuedTask:
     task_id: str
     goal: str

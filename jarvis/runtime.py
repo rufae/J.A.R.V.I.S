@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import concurrent.futures
 import logging
 import threading
 import time
@@ -136,7 +137,14 @@ class JarvisApplication:
                 return
 
             self.state_manager.transition_to(AssistantState.LISTENING)
-            spoken_text = self.voice.listen_for_command()
+            asr_timeout = self._config.voice.max_listen_seconds + 5.0
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(self.voice.listen_for_command)
+                try:
+                    spoken_text = future.result(timeout=asr_timeout)
+                except concurrent.futures.TimeoutError:
+                    LOGGER.error("ASR timed out after %.1f seconds", asr_timeout)
+                    spoken_text = ""
             self.state_manager.set_last_command(spoken_text)
 
             if not spoken_text:

@@ -11,13 +11,13 @@ from jarvis.agent.models import ToolDefinition
 LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass()
 class PlannerStep:
     tool_name: str
     summary: str
 
 
-@dataclass(slots=True)
+@dataclass()
 class PlannerTrace:
     steps: list[PlannerStep] = field(default_factory=list)
 

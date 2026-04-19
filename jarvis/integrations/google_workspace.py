@@ -99,7 +99,15 @@ class GoogleWorkspaceGateway:
             return None
 
         credentials_path = Path(self._config.credentials_path).expanduser()
-        token_path = Path(self._config.token_path).expanduser() if self._config.token_path else credentials_path.with_name("token.json")
+
+        # Use a per-scope token file so calendar and contacts credentials don't collide.
+        if self._config.token_path:
+            base_token_path = Path(self._config.token_path).expanduser()
+        else:
+            base_token_path = credentials_path.with_name("token.json")
+
+        scope_suffix = "_".join(s.rstrip("/").split("/")[-1] for s in scopes)
+        token_path = base_token_path.with_stem(f"{base_token_path.stem}_{scope_suffix}")
 
         creds = None
         if token_path.exists():

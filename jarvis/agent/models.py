@@ -4,14 +4,14 @@ from dataclasses import dataclass, field
 from typing import Any
 
 
-@dataclass(slots=True)
+@dataclass()
 class ToolDefinition:
     name: str
     description: str
     arguments: dict[str, str] = field(default_factory=dict)
 
 
-@dataclass(slots=True)
+@dataclass()
 class AgentDecision:
     mode: str
     response: str = ""
@@ -20,7 +20,7 @@ class AgentDecision:
     thought: str = ""
 
 
-@dataclass(slots=True)
+@dataclass()
 class AgentExecutionResult:
     success: bool
     response: str

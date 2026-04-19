@@ -10,7 +10,7 @@ from jarvis.core.intent_parser import Intent
 LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass()
 class CommandResult:
     success: bool
     message: str

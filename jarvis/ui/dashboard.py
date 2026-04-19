@@ -44,7 +44,7 @@ class DashboardServer:
             from flask import Flask
             from flask_socketio import SocketIO
         except Exception:
-            LOGGER.warning("Flask dashboard dependencies are not installed")
+            LOGGER.exception("Flask/SocketIO import failed")
             return False
 
         app = Flask(__name__)
@@ -211,7 +211,7 @@ def _build_html() -> str:
     </section>
   </main>
 
-  <script src=\"https://cdn.socket.io/4.7.5/socket.io.min.js\"></script>
+  <script src=\"/socket.io/socket.io.js\"></script>
   <script>
     const socket = io();
     const stateEl = document.getElementById("state");

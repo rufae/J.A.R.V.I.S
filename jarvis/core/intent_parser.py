@@ -5,14 +5,14 @@ from dataclasses import dataclass, field
 from typing import Callable, Pattern
 
 
-@dataclass(slots=True)
+@dataclass()
 class Intent:
     name: str
     entities: dict[str, str] = field(default_factory=dict)
     text: str = ""
 
 
-@dataclass(slots=True)
+@dataclass()
 class IntentRule:
     pattern: Pattern[str]
     intent_name: str

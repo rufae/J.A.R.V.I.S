@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-@dataclass(slots=True)
+@dataclass()
 class AudioConfig:
     sample_rate: int = 16_000
     channels: int = 1
@@ -16,7 +16,7 @@ class AudioConfig:
     simulated_audio: bool = False
 
 
-@dataclass(slots=True)
+@dataclass()
 class VoiceConfig:
     backend: str = "vosk"
     vosk_model_path: str = ""
@@ -31,14 +31,14 @@ class VoiceConfig:
     demo_command: str = "what can you do"
 
 
-@dataclass(slots=True)
+@dataclass()
 class UIConfig:
     enabled: bool = True
     host: str = "127.0.0.1"
     port: int = 5050
 
 
-@dataclass(slots=True)
+@dataclass()
 class TTSConfig:
     enabled: bool = True
     backend: str = "pyttsx3"
@@ -51,14 +51,14 @@ class TTSConfig:
     piper_binary: str = "piper"
 
 
-@dataclass(slots=True)
+@dataclass()
 class SystemConfig:
     log_level: str = "INFO"
     safe_mode: bool = True
     allow_shutdown: bool = False
 
 
-@dataclass(slots=True)
+@dataclass()
 class OllamaConfig:
     enabled: bool = True
     base_url: str = "http://127.0.0.1:11434"
@@ -67,42 +67,42 @@ class OllamaConfig:
     temperature: float = 0.2
 
 
-@dataclass(slots=True)
+@dataclass()
 class GoogleConfig:
     enabled: bool = False
     credentials_path: str = ""
     token_path: str = ""
 
 
-@dataclass(slots=True)
+@dataclass()
 class FilesystemConfig:
     allowed_roots: list[Path] = field(default_factory=lambda: [Path.cwd(), Path.home()])
 
 
-@dataclass(slots=True)
+@dataclass()
 class MemoryConfig:
     database_path: Path = field(default_factory=lambda: Path("jarvis_data/agent_memory.sqlite3"))
 
 
-@dataclass(slots=True)
+@dataclass()
 class AgentConfig:
     max_planning_steps: int = 4
 
 
-@dataclass(slots=True)
+@dataclass()
 class SchedulerConfig:
     enable_calendar_watch: bool = True
     calendar_poll_seconds: int = 120
     reminder_window_minutes: int = 15
 
 
-@dataclass(slots=True)
+@dataclass()
 class TaskConfig:
     max_attempts: int = 3
     retry_delay_seconds: int = 5
 
 
-@dataclass(slots=True)
+@dataclass()
 class AppConfig:
     audio: AudioConfig = field(default_factory=AudioConfig)
     voice: VoiceConfig = field(default_factory=VoiceConfig)

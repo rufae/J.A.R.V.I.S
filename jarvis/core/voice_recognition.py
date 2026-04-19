@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import audioop
 import json
 import logging
 import time

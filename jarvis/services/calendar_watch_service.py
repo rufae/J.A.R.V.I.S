@@ -50,6 +50,14 @@ class CalendarWatchService:
             return
 
         now = dt.datetime.utcnow()
+
+        # Prune keys for events that have already passed to prevent unbounded growth.
+        current_keys = {
+            f"{event.get('summary','')}|{event.get('start','')}"
+            for event in events
+        }
+        self._notified_keys &= current_keys
+
         for event in events:
             start = self._parse_datetime(event.get("start", ""))
             if start is None:

@@ -15,7 +15,7 @@ class AssistantState(str, Enum):
     SPEAKING = "SPEAKING"
 
 
-@dataclass(slots=True)
+@dataclass()
 class StateSnapshot:
     state: AssistantState
     last_command: str

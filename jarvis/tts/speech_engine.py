@@ -9,9 +9,6 @@ import wave
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-import numpy as np
-import sounddevice as sd
-
 from jarvis.core.config import TTSConfig
 
 
@@ -36,6 +33,12 @@ class SpeechEngine:
         self._thread.start()
 
     def stop(self) -> None:
+        # Drain the queue before stopping so in-flight speech is not abruptly cut.
+        try:
+            while not self._messages.empty():
+                self._messages.get_nowait()
+        except Exception:
+            pass
         self._running.clear()
 
     def speak(self, text: str) -> None:
@@ -113,7 +116,7 @@ class SpeechEngine:
             self._engine = engine
             return True
         except Exception:
-            LOGGER.warning("pyttsx3 is not available")
+            LOGGER.exception("pyttsx3 init failed")
             self._engine = None
             return False
 
@@ -137,6 +140,8 @@ class SpeechEngine:
         self._engine.runAndWait()
 
     def _speak_kokoro(self, text: str) -> None:
+        import sounddevice as sd
+
         generator = self._engine(
             text,
             voice=self._config.kokoro_voice,
@@ -176,6 +181,9 @@ class SpeechEngine:
 
     @staticmethod
     def _play_wav_file(path: Path) -> None:
+        import numpy as np
+        import sounddevice as sd
+
         with wave.open(str(path), "rb") as wav_file:
             frames = wav_file.readframes(wav_file.getnframes())
             samplerate = wav_file.getframerate()

@@ -1,5 +1,6 @@
 .env
 .venv/
+venv/
 __pycache__/
 *.pyc
 jarvis_data/*.sqlite3

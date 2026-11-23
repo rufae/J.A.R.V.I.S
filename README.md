@@ -1,6 +1,21 @@
 # JARVIS
 
+[![CI](https://github.com/rufae/J.A.R.V.I.S/actions/workflows/ci.yml/badge.svg)](https://github.com/rufae/J.A.R.V.I.S/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-63-brightgreen.svg)](tests/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Lint: ruff](https://img.shields.io/badge/lint-ruff-261230.svg)](ruff.toml)
+
 Production-grade local AI assistant for Ubuntu Linux with offline-first voice control, Ollama-based agent orchestration, desktop automation, filesystem tooling, Google Workspace integration, persistent memory, background task execution, and a pluggable real-time speech stack.
+
+## Highlights
+
+| | |
+|---|---|
+| **Voice-first** | Wake word detection, adaptive VAD and pluggable real-time speech (whisper/parakeet) — works offline |
+| **Agentic core** | Layered, event-driven architecture: intent parser → command registry → planner/executor with tool traces |
+| **Local AI** | Ollama orchestration with graceful fallback to deterministic commands |
+| **Integrations** | Desktop automation, filesystem tools, Google Workspace, persistent SQLite memory |
+| **Quality** | 63 tests (pytest) · ruff lint + format · CI on every push |
 
 ## Architecture
 

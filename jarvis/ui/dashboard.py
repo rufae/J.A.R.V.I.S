@@ -7,7 +7,6 @@ from typing import Any
 
 from jarvis.ui.ui_state_bridge import UIStateBridge
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -31,7 +30,9 @@ class DashboardServer:
         self._running.set()
         self._thread = threading.Thread(target=self._emit_loop, name="ui-emitter", daemon=True)
         self._thread.start()
-        self._server_thread = threading.Thread(target=self._run_server, name="ui-server", daemon=True)
+        self._server_thread = threading.Thread(
+            target=self._run_server, name="ui-server", daemon=True
+        )
         self._server_thread.start()
 
         LOGGER.info("Dashboard available at http://%s:%s", self._host, self._port)

@@ -4,16 +4,17 @@ import logging
 import queue
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
-from jarvis.agent.memory_store import AgentMemoryStore
-from jarvis.agent.memory_store import TASK_STATUS_COMPLETED
-from jarvis.agent.memory_store import TASK_STATUS_FAILED
-from jarvis.agent.memory_store import TASK_STATUS_PENDING
-from jarvis.agent.memory_store import TASK_STATUS_RUNNING
+from jarvis.agent.memory_store import (
+    TASK_STATUS_COMPLETED,
+    TASK_STATUS_FAILED,
+    TASK_STATUS_PENDING,
+    TASK_STATUS_RUNNING,
+    AgentMemoryStore,
+)
 from jarvis.agent.models import AgentExecutionResult
-
 
 LOGGER = logging.getLogger(__name__)
 

@@ -3,13 +3,11 @@ from __future__ import annotations
 import importlib
 import logging
 import pkgutil
+from collections.abc import Callable
 from types import ModuleType
-from typing import Any
-from typing import Callable
 
 from jarvis.core.command_registry import CommandRegistry
 from jarvis.core.intent_parser import IntentParser
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,7 +40,9 @@ class PluginManager:
                 self._loaded_modules.append(module_name)
                 LOGGER.info("Loaded plugin module %s", module_name)
 
-    def _register_module(self, module: ModuleType, parser: IntentParser, commands: CommandRegistry) -> bool:
+    def _register_module(
+        self, module: ModuleType, parser: IntentParser, commands: CommandRegistry
+    ) -> bool:
         register = getattr(module, "register", None)
         if not callable(register):
             return False

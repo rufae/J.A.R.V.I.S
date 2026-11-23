@@ -7,7 +7,6 @@ from typing import Any
 
 from jarvis.core.config import GoogleConfig
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -50,7 +49,9 @@ class GoogleWorkspaceGateway:
         summary = "; ".join(f"{item['summary']} at {item['start']}" for item in normalized[:3])
         return True, f"Upcoming events: {summary}", normalized
 
-    def search_contacts(self, query: str, max_results: int = 5) -> tuple[bool, str, list[dict[str, Any]]]:
+    def search_contacts(
+        self, query: str, max_results: int = 5
+    ) -> tuple[bool, str, list[dict[str, Any]]]:
         service = self._build_service("people", "v1", [self.CONTACT_SCOPE])
         if service is None:
             return False, "Google Contacts integration is not configured.", []

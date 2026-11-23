@@ -5,4 +5,4 @@ __pycache__/
 *.pyc
 jarvis_data/*.sqlite3
 credentials/google-token.json
-credentials/google-client-secret.json
+credentials/google-client-secret.json.coverage

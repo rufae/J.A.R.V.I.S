@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import logging
 import math
 import queue
@@ -10,7 +11,6 @@ from typing import Any
 
 from jarvis.core.config import AudioConfig
 from jarvis.core.state_manager import StateManager
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +33,9 @@ class AudioStreamService:
             LOGGER.info("Audio stream started with sounddevice backend")
             return
 
-        self._thread = threading.Thread(target=self._simulate_audio_loop, name="audio-sim", daemon=True)
+        self._thread = threading.Thread(
+            target=self._simulate_audio_loop, name="audio-sim", daemon=True
+        )
         self._thread.start()
         LOGGER.warning("Audio stream running in simulated mode")
 
@@ -97,10 +99,8 @@ class AudioStreamService:
         try:
             self._amplitude_queue.put_nowait(amplitude)
         except queue.Full:
-            try:
+            with contextlib.suppress(queue.Empty):
                 _ = self._amplitude_queue.get_nowait()
-            except queue.Empty:
-                pass
             self._amplitude_queue.put_nowait(amplitude)
 
     @staticmethod

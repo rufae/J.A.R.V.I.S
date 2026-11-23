@@ -6,7 +6,6 @@ import shlex
 import subprocess
 from pathlib import Path
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -17,15 +16,25 @@ class AppLauncher:
             "code": "code",
             "firefox": "firefox",
             "terminal": "gnome-terminal",
+            "terminator": "terminator",
+            "files": "nautilus",
+            "file manager": "nautilus",
+            "explorer": "nautilus",
+            "nautilus": "nautilus",
+            "obsidian": "obsidian",
         }
         self._desktop_index = self._build_desktop_index()
 
     def launch(self, app_name: str) -> tuple[bool, str]:
         normalized = app_name.strip().lower()
-        command = self._app_map.get(normalized) or self._desktop_index.get(normalized) or normalized
+        command = self.resolve_command(normalized)
 
         try:
-            subprocess.Popen(shlex.split(command), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.Popen(
+                shlex.split(command),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
             LOGGER.info("Launched app command=%s", command)
             return True, f"Opening {normalized}."
         except FileNotFoundError:
@@ -34,6 +43,10 @@ class AppLauncher:
         except Exception:
             LOGGER.exception("Failed to launch app %s", command)
             return False, f"I could not open {normalized}."
+
+    def resolve_command(self, app_name: str) -> str:
+        normalized = app_name.strip().lower()
+        return self._app_map.get(normalized) or self._desktop_index.get(normalized) or normalized
 
     def discover_apps(self, limit: int = 100) -> list[str]:
         app_names = set(self._app_map.keys())
@@ -54,7 +67,9 @@ class AppLauncher:
                 command = self._extract_field(content, "Exec")
                 if not name or not command:
                     continue
-                cleaned = shlex.split(command.replace("%U", "").replace("%u", "").replace("%F", "").replace("%f", ""))
+                cleaned = shlex.split(
+                    command.replace("%U", "").replace("%u", "").replace("%F", "").replace("%f", "")
+                )
                 if not cleaned:
                     continue
                 index[name.strip().lower()] = cleaned[0]

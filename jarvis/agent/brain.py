@@ -5,10 +5,8 @@ import logging
 import urllib.error
 import urllib.request
 
-from jarvis.agent.models import AgentDecision
-from jarvis.agent.models import ToolDefinition
+from jarvis.agent.models import AgentDecision, ToolDefinition
 from jarvis.core.config import OllamaConfig
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,7 +19,12 @@ class OllamaBrain:
     def is_enabled(self) -> bool:
         return bool(self._config.enabled and self._config.base_url and self._config.model)
 
-    def decide(self, user_text: str, tools: list[ToolDefinition], system_context: dict[str, str]) -> AgentDecision:
+    def decide(
+        self,
+        user_text: str,
+        tools: list[ToolDefinition],
+        system_context: dict[str, str],
+    ) -> AgentDecision:
         if not self.is_enabled:
             return AgentDecision(mode="reply", response="Local agent brain is not enabled.")
 
@@ -51,11 +54,19 @@ class OllamaBrain:
             return AgentDecision(mode="reply", response="I cannot reach the local Ollama service.")
         except Exception:
             LOGGER.exception("Unexpected Ollama failure")
-            return AgentDecision(mode="reply", response="The local AI brain failed to process the request.")
+            return AgentDecision(
+                mode="reply",
+                response="The local AI brain failed to process the request.",
+            )
 
         return self._parse_response(raw_payload.get("response", ""))
 
-    def _build_prompt(self, user_text: str, tools: list[ToolDefinition], system_context: dict[str, str]) -> str:
+    def _build_prompt(
+        self,
+        user_text: str,
+        tools: list[ToolDefinition],
+        system_context: dict[str, str],
+    ) -> str:
         tool_lines = []
         for tool in tools:
             arguments = ", ".join(f"{key}: {value}" for key, value in tool.arguments.items())
@@ -71,7 +82,8 @@ class OllamaBrain:
             "Rules:\n"
             "- Use mode=tool when a tool can answer or execute the request.\n"
             "- Use mode=reply only for conversational answers or when no tool fits.\n"
-            "- If previous tool results are present, use them to continue the plan or produce the final answer.\n"
+            "- If previous tool results are present, use them to continue the plan "
+            "or produce the final answer.\n"
             "- Never invent tool names.\n"
             "- Keep response concise and operational.\n\n"
             "System context:\n"
@@ -87,7 +99,10 @@ class OllamaBrain:
             payload = json.loads(response_text)
         except Exception:
             LOGGER.warning("Ollama returned non-JSON response")
-            return AgentDecision(mode="reply", response=response_text.strip() or "I could not parse the AI response.")
+            return AgentDecision(
+                mode="reply",
+                response=response_text.strip() or "I could not parse the AI response.",
+            )
 
         mode = str(payload.get("mode", "reply")).strip().lower() or "reply"
         response = str(payload.get("response", "")).strip()

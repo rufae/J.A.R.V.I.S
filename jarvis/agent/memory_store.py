@@ -6,7 +6,6 @@ import time
 import uuid
 from pathlib import Path
 
-
 TASK_STATUS_PENDING = "PENDING"
 TASK_STATUS_RUNNING = "RUNNING"
 TASK_STATUS_COMPLETED = "COMPLETED"
@@ -31,10 +30,18 @@ class AgentMemoryStore:
         with self._lock, sqlite3.connect(self._database_path) as connection:
             connection.execute(
                 """
-                INSERT INTO interactions (created_at, user_text, response_text, intent_name, tool_name, agent_mode)
+                INSERT INTO interactions
+                    (created_at, user_text, response_text, intent_name, tool_name, agent_mode)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                (time.time(), user_text, response_text, intent_name, tool_name, agent_mode),
+                (
+                    time.time(),
+                    user_text,
+                    response_text,
+                    intent_name,
+                    tool_name,
+                    agent_mode,
+                ),
             )
             connection.commit()
 
@@ -69,10 +76,22 @@ class AgentMemoryStore:
         with self._lock, sqlite3.connect(self._database_path) as connection:
             connection.execute(
                 """
-                INSERT INTO tasks (task_id, created_at, updated_at, goal, status, source, attempts, last_error, result_text)
+                INSERT INTO tasks
+                    (task_id, created_at, updated_at, goal, status, source, attempts,
+                     last_error, result_text)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
-                (task_id, time.time(), time.time(), goal, TASK_STATUS_PENDING, source, 0, "", ""),
+                (
+                    task_id,
+                    time.time(),
+                    time.time(),
+                    goal,
+                    TASK_STATUS_PENDING,
+                    source,
+                    0,
+                    "",
+                    "",
+                ),
             )
             connection.commit()
         return task_id

@@ -4,7 +4,6 @@ import fnmatch
 import logging
 from pathlib import Path
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -61,7 +60,44 @@ class FileActions:
 
         return True, f"Saved file {path}"
 
-    def search_files(self, pattern: str, base_path: str = ".", limit: int = 25) -> tuple[bool, str, list[str]]:
+    def delete_path(self, raw_path: str) -> tuple[bool, str]:
+        try:
+            path = self._resolve_allowed_path(raw_path)
+        except ValueError as exc:
+            return False, str(exc)
+
+        if not path.exists():
+            return False, f"Path not found: {path}"
+
+        if path.is_dir():
+            return False, "Deleting directories is disabled. Delete files only."
+
+        try:
+            path.unlink()
+        except Exception:
+            LOGGER.exception("Failed to delete path %s", path)
+            return False, f"Could not delete file: {path}"
+
+        return True, f"Deleted file {path}"
+
+    def summarize_text_file(self, raw_path: str, max_chars: int = 12000) -> tuple[bool, str, str]:
+        success, message, content = self.read_text_file(raw_path, max_chars=max_chars)
+        if not success:
+            return False, message, ""
+
+        cleaned_lines = [line.strip() for line in content.splitlines() if line.strip()]
+        line_count = len(cleaned_lines)
+        word_count = len(content.split())
+        preview = " ".join(cleaned_lines[:3])[:280]
+        summary = (
+            f"Summary: {line_count} non-empty lines and about {word_count} words. "
+            f"Preview: {preview}"
+        )
+        return True, f"Analyzed file {raw_path}", summary
+
+    def search_files(
+        self, pattern: str, base_path: str = ".", limit: int = 25
+    ) -> tuple[bool, str, list[str]]:
         try:
             root = self._resolve_allowed_path(base_path)
         except ValueError as exc:
@@ -82,7 +118,7 @@ class FileActions:
 
     def _resolve_allowed_path(self, raw_path: str, allow_create: bool = False) -> Path:
         requested = Path(raw_path).expanduser()
-        candidate = requested.resolve(strict=False if allow_create else True)
+        candidate = requested.resolve(strict=not allow_create)
         for root in self._allowed_roots:
             if candidate == root or root in candidate.parents:
                 return candidate

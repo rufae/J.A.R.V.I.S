@@ -4,9 +4,7 @@ import logging
 from dataclasses import dataclass, field
 
 from jarvis.agent.brain import OllamaBrain
-from jarvis.agent.models import AgentExecutionResult
-from jarvis.agent.models import ToolDefinition
-
+from jarvis.agent.models import AgentExecutionResult, ToolDefinition
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +37,13 @@ class AgentPlanner:
     def max_steps(self) -> int:
         return self._max_steps
 
-    def plan(self, user_text: str, tools: list[ToolDefinition], system_context: dict[str, str], executor) -> AgentExecutionResult:
+    def plan(
+        self,
+        user_text: str,
+        tools: list[ToolDefinition],
+        system_context: dict[str, str],
+        executor,
+    ) -> AgentExecutionResult:
         trace = PlannerTrace()
         last_result: AgentExecutionResult | None = None
 
@@ -55,7 +59,10 @@ class AgentPlanner:
                     return AgentExecutionResult(success=True, response=decision.response)
                 if last_result is not None:
                     return last_result
-                return AgentExecutionResult(success=False, response="The planner did not produce a final response.")
+                return AgentExecutionResult(
+                    success=False,
+                    response="The planner did not produce a final response.",
+                )
 
             result = executor(decision)
             trace.add(result.tool_name or decision.tool_name, result.response)
@@ -71,4 +78,6 @@ class AgentPlanner:
                 tool_name=last_result.tool_name,
                 details=last_result.details,
             )
-        return AgentExecutionResult(success=False, response="Planner exceeded the maximum number of steps.")
+        return AgentExecutionResult(
+            success=False, response="Planner exceeded the maximum number of steps."
+        )

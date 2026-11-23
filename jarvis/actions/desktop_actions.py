@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
-import shlex
 import subprocess
-from typing import Iterable
-
+from collections.abc import Iterable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -72,5 +70,6 @@ class DesktopActions:
 
             pyautogui.FAILSAFE = True
             return pyautogui
-        except Exception:
+        except BaseException as exc:
+            LOGGER.warning("pyautogui backend unavailable: %s", exc)
             return None

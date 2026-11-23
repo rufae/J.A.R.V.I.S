@@ -1,0 +1,29 @@
+# Config de lint del proyecto (CI la usa tal cual).
+# Seleccionamos reglas de calidad real y dejamos fuera las que chocan con
+# patrones deliberados del asistente (automatización de escritorio defensiva,
+# lectura tolerante de .desktop, hora local en el dashboard).
+
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = [
+    "E",    # errores de pycodestyle
+    "F",    # pyflakes
+    "W",    # warnings de pycodestyle
+    "I",    # orden de imports
+    "UP",   # modernización (pyupgrade)
+    "B",    # bugbear (bugs comunes)
+    "SIM",  # simplificaciones
+    "RUF",  # reglas internas de calidad
+]
+ignore = [
+    "BLE001",   # capturar Exception a propósito en acciones de escritorio
+    "S110",     # try-except-continue deliberado al escanear apps
+    "S112",
+    "DTZ003",   # hora local deliberada (dashboard)
+    "RUF034",
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["B011"]

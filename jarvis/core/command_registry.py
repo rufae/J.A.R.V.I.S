@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from jarvis.core.intent_parser import Intent
-
 
 LOGGER = logging.getLogger(__name__)
 

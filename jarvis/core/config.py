@@ -23,6 +23,11 @@ class VoiceConfig:
     faster_whisper_model: str = "small"
     faster_whisper_device: str = "cpu"
     faster_whisper_compute_type: str = "int8"
+    asr_language: str = "en"
+    wake_phrase_enabled: bool = False
+    wake_phrase: str = "hola jarvis vamos a trabajar"
+    wake_aliases: str = "jarvis,yarvis"
+    wake_max_listen_seconds: float = 3.5
     vad_enabled: bool = True
     vad_speech_threshold: float = 0.015
     silence_timeout_seconds: float = 2.5
@@ -119,10 +124,12 @@ class AppConfig:
     music_dir: Path = field(default_factory=lambda: Path("jarvis/audio_assets/music"))
 
     @classmethod
-    def from_env(cls) -> "AppConfig":
+    def from_env(cls) -> AppConfig:
         cfg = cls()
         cfg.audio.simulated_audio = _env_bool("JARVIS_SIMULATED_AUDIO", cfg.audio.simulated_audio)
-        cfg.audio.clap_threshold = float(os.getenv("JARVIS_CLAP_THRESHOLD", cfg.audio.clap_threshold))
+        cfg.audio.clap_threshold = float(
+            os.getenv("JARVIS_CLAP_THRESHOLD", cfg.audio.clap_threshold)
+        )
         cfg.audio.clap_window_seconds = float(
             os.getenv("JARVIS_CLAP_WINDOW_SECONDS", cfg.audio.clap_window_seconds)
         )
@@ -140,6 +147,16 @@ class AppConfig:
         cfg.voice.faster_whisper_compute_type = os.getenv(
             "JARVIS_FASTER_WHISPER_COMPUTE_TYPE",
             cfg.voice.faster_whisper_compute_type,
+        )
+        cfg.voice.asr_language = os.getenv("JARVIS_ASR_LANGUAGE", cfg.voice.asr_language)
+        cfg.voice.wake_phrase_enabled = _env_bool(
+            "JARVIS_WAKE_PHRASE_ENABLED",
+            cfg.voice.wake_phrase_enabled,
+        )
+        cfg.voice.wake_phrase = os.getenv("JARVIS_WAKE_PHRASE", cfg.voice.wake_phrase)
+        cfg.voice.wake_aliases = os.getenv("JARVIS_WAKE_ALIASES", cfg.voice.wake_aliases)
+        cfg.voice.wake_max_listen_seconds = float(
+            os.getenv("JARVIS_WAKE_MAX_LISTEN_SECONDS", cfg.voice.wake_max_listen_seconds)
         )
         cfg.voice.vad_enabled = _env_bool("JARVIS_VAD_ENABLED", cfg.voice.vad_enabled)
         cfg.voice.vad_speech_threshold = float(
@@ -162,7 +179,9 @@ class AppConfig:
         cfg.tts.backend = os.getenv("JARVIS_TTS_BACKEND", cfg.tts.backend)
         cfg.tts.rate = int(os.getenv("JARVIS_TTS_RATE", cfg.tts.rate))
         cfg.tts.volume = float(os.getenv("JARVIS_TTS_VOLUME", cfg.tts.volume))
-        cfg.tts.stream_sentences = _env_bool("JARVIS_TTS_STREAM_SENTENCES", cfg.tts.stream_sentences)
+        cfg.tts.stream_sentences = _env_bool(
+            "JARVIS_TTS_STREAM_SENTENCES", cfg.tts.stream_sentences
+        )
         cfg.tts.kokoro_voice = os.getenv("JARVIS_KOKORO_VOICE", cfg.tts.kokoro_voice)
         cfg.tts.kokoro_lang_code = os.getenv("JARVIS_KOKORO_LANG_CODE", cfg.tts.kokoro_lang_code)
         cfg.tts.piper_model_path = os.getenv("JARVIS_PIPER_MODEL_PATH", cfg.tts.piper_model_path)
@@ -178,15 +197,21 @@ class AppConfig:
         cfg.ollama.timeout_seconds = int(
             os.getenv("JARVIS_OLLAMA_TIMEOUT_SECONDS", cfg.ollama.timeout_seconds)
         )
-        cfg.ollama.temperature = float(os.getenv("JARVIS_OLLAMA_TEMPERATURE", cfg.ollama.temperature))
+        cfg.ollama.temperature = float(
+            os.getenv("JARVIS_OLLAMA_TEMPERATURE", cfg.ollama.temperature)
+        )
 
         cfg.google.enabled = _env_bool("JARVIS_GOOGLE_ENABLED", cfg.google.enabled)
-        cfg.google.credentials_path = os.getenv("JARVIS_GOOGLE_CREDENTIALS_PATH", cfg.google.credentials_path)
+        cfg.google.credentials_path = os.getenv(
+            "JARVIS_GOOGLE_CREDENTIALS_PATH", cfg.google.credentials_path
+        )
         cfg.google.token_path = os.getenv("JARVIS_GOOGLE_TOKEN_PATH", cfg.google.token_path)
 
         roots = os.getenv("JARVIS_ALLOWED_FILE_ROOTS")
         if roots:
-            cfg.filesystem.allowed_roots = [Path(item).expanduser() for item in roots.split(":") if item.strip()]
+            cfg.filesystem.allowed_roots = [
+                Path(item).expanduser() for item in roots.split(":") if item.strip()
+            ]
 
         memory_path = os.getenv("JARVIS_MEMORY_DB_PATH")
         if memory_path:

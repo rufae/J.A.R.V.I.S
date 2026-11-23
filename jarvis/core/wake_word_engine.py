@@ -5,7 +5,6 @@ import threading
 
 from jarvis.core.state_manager import AssistantState, StateManager
 
-
 LOGGER = logging.getLogger(__name__)
 
 

@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any
-from typing import Callable
 
 from jarvis.agent.brain import OllamaBrain
-from jarvis.agent.models import AgentDecision
-from jarvis.agent.models import AgentExecutionResult
-from jarvis.agent.models import ToolDefinition
+from jarvis.agent.models import AgentDecision, AgentExecutionResult, ToolDefinition
 from jarvis.agent.planner import AgentPlanner
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,11 +36,16 @@ class AgentOrchestrator:
 
     def _execute_decision(self, decision: AgentDecision) -> AgentExecutionResult:
         if decision.mode != "tool":
-            return AgentExecutionResult(success=True, response=decision.response or "No tool execution required.")
+            return AgentExecutionResult(
+                success=True,
+                response=decision.response or "No tool execution required.",
+            )
 
         target = self._tools.get(decision.tool_name)
         if target is None:
-            return AgentExecutionResult(success=False, response="The selected tool is not registered.")
+            return AgentExecutionResult(
+                success=False, response="The selected tool is not registered."
+            )
 
         _definition, handler = target
         try:

@@ -3,11 +3,10 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from typing import Callable
+from collections.abc import Callable
 
 from jarvis.core.audio_stream import AudioStreamService
 from jarvis.core.config import AudioConfig
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -55,7 +54,10 @@ class ClapDetectorService:
                 LOGGER.debug("Clap candidate detected amplitude=%.3f", amplitude)
 
             self._clap_times = [t for t in self._clap_times if (now - t) <= window]
-            if len(self._clap_times) == 2 and (self._clap_times[-1] - self._clap_times[0]) <= window:
+            if (
+                len(self._clap_times) == 2
+                and (self._clap_times[-1] - self._clap_times[0]) <= window
+            ):
                 LOGGER.info("Wake event detected by double clap")
                 self._clap_times.clear()
                 self._on_wake_event()

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from enum import Enum
-from typing import Callable
+from enum import StrEnum
 
 
-class AssistantState(str, Enum):
+class AssistantState(StrEnum):
     IDLE = "IDLE"
     LISTENING = "LISTENING"
     PROCESSING = "PROCESSING"

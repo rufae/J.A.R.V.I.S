@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Pattern
+from re import Pattern
 
 
 @dataclass()
@@ -31,7 +32,9 @@ class IntentParser:
         extractor: Callable[[re.Match[str]], dict[str, str]] | None = None,
     ) -> None:
         compiled = re.compile(regex, flags=re.IGNORECASE)
-        self._rules.append(IntentRule(pattern=compiled, intent_name=intent_name, extractor=extractor))
+        self._rules.append(
+            IntentRule(pattern=compiled, intent_name=intent_name, extractor=extractor)
+        )
 
     def parse(self, text: str) -> Intent:
         normalized = text.strip().lower()
@@ -44,25 +47,74 @@ class IntentParser:
         return Intent(name="UNKNOWN", entities={}, text=normalized)
 
     def _register_default_rules(self) -> None:
+        wake_prefix = r"(?:(?:jarvis|yarvis)\s+)?"
         self.register_rule(
-            r"^(?:open|launch|start)\s+(?P<app>[a-z0-9_-]+)$",
+            rf"^{wake_prefix}(?:open|launch|start|abre|abrir|inicia|iniciar|lanza|lanzar)"
+            rf"\s+(?P<app>[a-z0-9_\-\. ]+)$",
             "OPEN_APP",
+            extractor=lambda m: {"app": m.group("app").strip()},
         )
-        self.register_rule(r"^(?:show|list)\s+apps$", "LIST_APPS")
-        self.register_rule(r"^(?:play|start)\s+music$", "MEDIA_PLAY")
-        self.register_rule(r"^(?:pause|resume)\s+music$", "MEDIA_PAUSE")
-        self.register_rule(r"^(?:stop)\s+music$", "MEDIA_STOP")
-        self.register_rule(r"^(?:read|open)\s+file\s+(?P<path>.+)$", "FILE_READ")
-        self.register_rule(r"^(?:list|show)\s+files(?:\s+in)?\s+(?P<path>.+)$", "FILE_LIST")
+        self.register_rule(rf"^{wake_prefix}(?:show|list|muestra|listar)\s+apps$", "LIST_APPS")
         self.register_rule(
-            r"^(?:find|search)\s+files\s+(?P<pattern>[^\s]+)(?:\s+in\s+(?P<path>.+))?$",
+            rf"^{wake_prefix}(?:close|quit|exit|kill|cerrar|cierra)\s+(?P<app>[a-z0-9_\-\. ]+)$",
+            "CLOSE_APP",
+            extractor=lambda m: {"app": m.group("app").strip()},
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:play|start|pon|reproduce)\s+music(?:a)?$", "MEDIA_PLAY"
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:pause|resume|pausa|reanuda)\s+music(?:a)?$",
+            "MEDIA_PAUSE",
+        )
+        self.register_rule(rf"^{wake_prefix}(?:stop|deten|parar)\s+music(?:a)?$", "MEDIA_STOP")
+        self.register_rule(
+            rf"^{wake_prefix}(?:read|open|lee|abre)\s+file\s+(?P<path>.+)$", "FILE_READ"
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:create|write|new|crear|crea)\s+file\s+(?P<path>.+)$",
+            "FILE_CREATE",
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:delete|remove|erase|elimina|borra)\s+file\s+(?P<path>.+)$",
+            "FILE_DELETE",
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:analyze|summarize|investigate|analiza|resume|investiga)\s+file\s+(?P<path>.+)$",
+            "FILE_SUMMARY",
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:list|show|listar|muestra)\s+files(?:\s+in)?\s+(?P<path>.+)$",
+            "FILE_LIST",
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:find|search|busca)\s+files\s+(?P<pattern>[^\s]+)(?:\s+in\s+(?P<path>.+))?$",
             "FILE_SEARCH",
         )
-        self.register_rule(r"^(?:what(?:'s| is)\s+on\s+my\s+calendar|upcoming\s+events)$", "CALENDAR_UPCOMING")
-        self.register_rule(r"^(?:find|search)\s+contact\s+(?P<query>.+)$", "CONTACT_SEARCH")
-        self.register_rule(r"^(?:do|execute|run)\s+task\s+(?P<goal>.+)$", "TASK_SUBMIT")
-        self.register_rule(r"^(?:list|show)\s+tasks$", "TASK_LIST")
-        self.register_rule(r"^(?:what\s+time\s+is\s+it|time)$", "SYSTEM_TIME")
-        self.register_rule(r"^(?:shutdown\s+system|power\s+off)$", "SHUTDOWN_SYSTEM")
-        self.register_rule(r"^(?:what\s+can\s+you\s+do|help)$", "SYSTEM_CAPABILITIES")
-        self.register_rule(r"^(?:jarvis|assistant)\s+(?P<query>.+)$", "AGENT_REQUEST")
+        self.register_rule(
+            rf"^{wake_prefix}(?:what(?:'s| is)\s+on\s+my\s+calendar|upcoming\s+events|"
+            rf"que\s+tengo\s+en\s+el\s+calendario)$",
+            "CALENDAR_UPCOMING",
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:find|search|busca)\s+contact\s+(?P<query>.+)$",
+            "CONTACT_SEARCH",
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:do|execute|run|ejecuta)\s+task\s+(?P<goal>.+)$",
+            "TASK_SUBMIT",
+        )
+        self.register_rule(rf"^{wake_prefix}(?:list|show|listar|muestra)\s+tasks$", "TASK_LIST")
+        self.register_rule(
+            rf"^{wake_prefix}(?:what\s+time\s+is\s+it|time|que\s+hora\s+es)$",
+            "SYSTEM_TIME",
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:shutdown\s+system|power\s+off|apaga\s+el\s+sistema)$",
+            "SHUTDOWN_SYSTEM",
+        )
+        self.register_rule(
+            rf"^{wake_prefix}(?:what\s+can\s+you\s+do|help|ayuda|que\s+puedes\s+hacer)$",
+            "SYSTEM_CAPABILITIES",
+        )
+        self.register_rule(r"^(?:jarvis|yarvis|assistant)\s+(?P<query>.+)$", "AGENT_REQUEST")

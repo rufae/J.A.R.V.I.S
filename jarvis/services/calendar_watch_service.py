@@ -4,10 +4,9 @@ import datetime as dt
 import logging
 import threading
 import time
-from typing import Callable
+from collections.abc import Callable
 
 from jarvis.integrations.google_workspace import GoogleWorkspaceGateway
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -52,10 +51,7 @@ class CalendarWatchService:
         now = dt.datetime.utcnow()
 
         # Prune keys for events that have already passed to prevent unbounded growth.
-        current_keys = {
-            f"{event.get('summary','')}|{event.get('start','')}"
-            for event in events
-        }
+        current_keys = {f"{event.get('summary', '')}|{event.get('start', '')}" for event in events}
         self._notified_keys &= current_keys
 
         for event in events:
@@ -66,11 +62,13 @@ class CalendarWatchService:
             if delta_minutes < 0 or delta_minutes > self._reminder_window_minutes:
                 continue
 
-            key = f"{event.get('summary','')}|{event.get('start','')}"
+            key = f"{event.get('summary', '')}|{event.get('start', '')}"
             if key in self._notified_keys:
                 continue
 
-            reminder = f"Reminder: {event.get('summary', 'event')} starts at {event.get('start', '')}."
+            reminder = (
+                f"Reminder: {event.get('summary', 'event')} starts at {event.get('start', '')}."
+            )
             self._notified_keys.add(key)
             self._on_reminder(reminder)
 
@@ -84,5 +82,5 @@ class CalendarWatchService:
         except ValueError:
             return None
         if parsed.tzinfo is not None:
-            return parsed.astimezone(dt.timezone.utc).replace(tzinfo=None)
+            return parsed.astimezone(dt.UTC).replace(tzinfo=None)
         return parsed
